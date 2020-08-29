@@ -95,8 +95,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - run: |
+        npm install ask-cli;
         cd lambda;
-        npm install -g ask-cli;
         npm install;
         npm run copy-package;
         cd src;
