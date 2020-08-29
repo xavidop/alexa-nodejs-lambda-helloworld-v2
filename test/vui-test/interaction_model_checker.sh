@@ -32,7 +32,6 @@ for d in ${folder}; do
     if [[ -z ${number_conflicts} || ${number_conflicts} == "null" ]]
     then
         echo "No Conflicts detected"
-        exit 0
     else
         echo "Number of conflicts detected: ${number_conflicts}"
         echo "Conflicts: ${conflicts}"
