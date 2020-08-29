@@ -204,10 +204,10 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         SKILL_ID: ${{ secrets.SKILL_ID }}
-
-  end-to-test:
+  
+  validation-test:
     runs-on: ubuntu-latest
-    name: End-to-end test
+    name: Validation test
     needs: integration-test
     steps:
     # To use this repository's private action,
@@ -216,9 +216,9 @@ jobs:
       uses: actions/checkout@v2
     - run: |
         sudo npm install -g ask-cli;
-        sudo npm install -g bespoken-tools;
         chmod +x -R ./test;
-        bst test --config test/e2e-bespoken-test/testing.json
+        cd test/validation-test/;
+        ./skill_validation_checker.sh $SKILL_ID v2
       env: # Or as an environment variable
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
@@ -227,3 +227,49 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         SKILL_ID: ${{ secrets.SKILL_ID }}
+    
+  submit:
+    runs-on: ubuntu-latest
+    name: Submit
+    needs: integration-test
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        sudo npm install -g ask-cli;
+        chmod +x -R ./test;
+        cd test/submit/;
+        ./submit.sh $SKILL_ID v2
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
+
+  # end-to-test:
+  #   runs-on: ubuntu-latest
+  #   name: End-to-end test
+  #   needs: integration-test
+  #   steps:
+  #   # To use this repository's private action,
+  #   # you must check out the repository
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
+  #   - run: |
+  #       sudo npm install -g ask-cli;
+  #       sudo npm install -g bespoken-tools;
+  #       chmod +x -R ./test;
+  #       bst test --config test/e2e-bespoken-test/testing.json
+  #     env: # Or as an environment variable
+  #       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  #       ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+  #       ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+  #       ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+  #       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       SKILL_ID: ${{ secrets.SKILL_ID }}
