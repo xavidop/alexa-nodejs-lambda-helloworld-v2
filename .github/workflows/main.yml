@@ -97,8 +97,9 @@ jobs:
         echo $PWD;
         git clone https://github.com/${GITHUB_REPOSITORY}.git
         cd alexa-nodejs-lambda-helloworld-v2;
+        chmod 777 -R ./
         ls -la;
-        cd lambda;
+        cd lambda/src;
         whoami;
         npm install;
         echo $PWD;
