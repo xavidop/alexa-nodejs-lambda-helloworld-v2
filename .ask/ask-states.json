@@ -25,6 +25,31 @@
           "lastDeployHash": "1tYE/EFqTNpN6n/m66RegKKtlow="
         }
       }
+    },
+    "__ENVIRONMENT_ASK_PROFILE__": {
+      "skillInfrastructure": {
+        "@ask-cli/lambda-deployer": {
+          "deployState": {
+            "default": {
+              "iamRole": "arn:aws:iam::141568529918:role/ask-lambda-alexa-nodejs-lambda-helloworld-v2-1598694434658",
+              "lambda": {
+                "arn": "arn:aws:lambda:us-east-1:141568529918:function:ask-alexa-nodejs-lambda-he-default-default-1598694445212",
+                "lastModified": "2020-08-29T10:40:58.405+0000",
+                "revisionId": "eeeee1c4-2c47-463c-927f-ef3074753dbd"
+              }
+            }
+          }
+        }
+      },
+      "skillId": "amzn1.ask.skill.a37d291d-4f48-46e0-8149-20fcbb1dda36",
+      "skillMetadata": {
+        "lastDeployHash": "akfVROzLAyhVmotpASooDMTXGn4="
+      },
+      "code": {
+        "default": {
+          "lastDeployHash": "1tYE/EFqTNpN6n/m66RegKKtlow="
+        }
+      }
     }
   }
 }
