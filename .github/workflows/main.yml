@@ -99,8 +99,12 @@ jobs:
         cd alexa-nodejs-lambda-helloworld-v2;
         ls -la;
         cd lambda;
+        whoami;
         npm install;
+        echo $PWD;
+        whoami;
         npm run copy-package;
+        whoami;
         cd src;
         npm run build-production
       working-directory: /home/node/app
