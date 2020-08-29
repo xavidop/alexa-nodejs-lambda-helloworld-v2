@@ -9,7 +9,7 @@ if [[ ${cli_version} == *"v1"* ]]
 then
     folder="../../models/*"
 else
-    folder="../../skill-package/interactionModels/*"
+    folder="../../skill-package/interactionModels/custom/*"
 fi
 
 for d in  ${folder}; do
