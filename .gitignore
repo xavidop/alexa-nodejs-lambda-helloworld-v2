@@ -1,0 +1,11 @@
+node_modules/
+package-lock.json
+.DS_Store
+test-results.xml
+eslint.xml
+lambda/custom/src/package.json
+mochawesome-report/
+.nyc_output/
+*.lcov
+test_output/
+*.log
