@@ -1,5 +1,5 @@
 ![.github/workflows/main.yml](https://github.com/xavidop/alexa-nodejs-lambda-helloworld-v2/workflows/.github/workflows/main.yml/badge.svg?branch=master&event=push)
-[![codecov](https://codecov.io/gh/xavidop/alexa-nodejs-lambda-helloworld/branch/master/graph/badge.svg)](https://codecov.io/gh/xavidop/alexa-nodejs-lambda-helloworld)
+[![codecov](https://codecov.io/gh/xavidop/alexa-nodejs-lambda-helloworld-v2/branch/master/graph/badge.svg)](https://codecov.io/gh/xavidop/alexa-nodejs-lambda-helloworld-v2)
 
 # DevOps your Skill
 <!-- TOC -->

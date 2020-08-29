@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Alexa Action
-        uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+        uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
       - run: |
           chmod +x -R ./test;
           ls -la
@@ -27,7 +27,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Alexa Action
-      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
     - run: |
         cd lambda;
         npm install
@@ -44,7 +44,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Alexa Action
-      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
     - run: |
         cd lambda;
         npm install;
@@ -66,7 +66,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Alexa Action
-      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
     - run: |
         cd lambda;
         npm install;
@@ -87,7 +87,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Alexa Action
-      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
     - run: |
         cd lambda;
         npm install;
@@ -97,6 +97,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    container: xavidop/alexa-ask-aws-cli:latest
     name: Deploy
     needs: codecov
     steps:
@@ -105,7 +106,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Alexa Action
-      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
     - run: |
         cd lambda;
         npm install;
@@ -113,6 +114,81 @@ jobs:
         cd src;
         npm run build-production
     - run: ask deploy --ignore-hash
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
+
+  check-utterance-conflicts:
+    runs-on: ubuntu-latest
+    container: xavidop/alexa-ask-aws-cli:latest
+    name: Check Utterance Conflicts
+    needs: deploy
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Alexa Action
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
+    - run: |
+        chmod +x -R ./test;
+        cd test/vui-test/;
+        ./interaction_model_checker.sh $SKILL_ID v2
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
+
+  check-utterance-resolution:
+    runs-on: ubuntu-latest
+    container: xavidop/alexa-ask-aws-cli:latest
+    name: Check Utterance Resolution
+    needs: deploy
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Alexa Action
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
+    - run: |
+        chmod +x -R ./test;
+        cd test/vui-test/;
+        ./utterance_resolution_checker.sh $SKILL_ID v2
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
+
+  check-utterance-evaluation:
+    runs-on: ubuntu-latest
+    container: xavidop/alexa-ask-aws-cli:latest
+    name: Check Utterance Evaluation
+    needs: deploy
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Alexa Action
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.2
+    - run: |
+        chmod +x -R ./test;
+        cd test/vui-test/;
+        ./utterance_evaluation_checker.sh $SKILL_ID v2
       env: # Or as an environment variable
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
