@@ -123,7 +123,6 @@ jobs:
       uses: actions/checkout@v2
     - run: |
         sudo npm install -g ask-cli;
-        sudo apt-get install -y jq
         chmod +x -R ./test;
         cd test/vui-test/;
         ./interaction_model_checker.sh $SKILL_ID v2
@@ -147,7 +146,6 @@ jobs:
       uses: actions/checkout@v2
     - run: |
         sudo npm install -g ask-cli;
-        sudo apt-get install -y jq
         chmod +x -R ./test;
         cd test/vui-test/;
         ./utterance_resolution_checker.sh $SKILL_ID v2
@@ -171,7 +169,6 @@ jobs:
       uses: actions/checkout@v2
     - run: |
         sudo npm install -g ask-cli;
-        sudo apt-get install -y jq
         chmod +x -R ./test;
         cd test/vui-test/;
         ./utterance_evaluation_checker.sh $SKILL_ID v2
