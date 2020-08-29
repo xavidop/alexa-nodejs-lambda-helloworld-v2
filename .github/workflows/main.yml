@@ -33,7 +33,8 @@ jobs:
     - name: Alexa Action
       uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
     - run: |
-        cd lambda/ && npm install
+        cd lambda;
+        npm install
     - name: Upload results
       uses: actions/upload-artifact@v2
       with:
@@ -55,6 +56,7 @@ jobs:
       uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
     - run: |
         cd lambda;
+        chmod +x -R node_modules/
         npm run lint;
         npm run lint-html
     - name: Upload results
