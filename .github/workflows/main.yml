@@ -95,15 +95,12 @@ jobs:
     # you must check out the repository
     - name: Checkout
       uses: actions/checkout@v2
-      with:
-          path: /home/node/app
     - run: |
         cd lambda;
         npm install;
         npm run copy-package;
         cd src;
         npm run build-production
-      working-directory: /home/node/app
     - run: ask deploy --ignore-hash
       working-directory: /home/node/app
       env: # Or as an environment variable
