@@ -94,3 +94,22 @@ jobs:
         npm run codecov
       env: # Or as an environment variable
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    needs: codecov
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Alexa Action
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+    - run: |
+        cd lambda;
+        npm install;
+        npm run copy-package;
+        cd lambda/src;
+        npm run build-production
+    - run: ask deploy --ignore-hash
