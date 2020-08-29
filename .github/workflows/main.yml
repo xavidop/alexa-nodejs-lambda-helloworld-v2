@@ -93,8 +93,6 @@ jobs:
     steps:
     # To use this repository's private action,
     # you must check out the repository
-    - name: Checkout
-      uses: actions/checkout@v2
     - run: |
         git clone https://github.com/${GITHUB_REPOSITORY}.git
         cd lambda;
@@ -102,6 +100,7 @@ jobs:
         npm run copy-package;
         cd src;
         npm run build-production
+      working-directory: /home/node/app
     - run: ask deploy --ignore-hash  
       working-directory: /home/node/app
       env: # Or as an environment variable
