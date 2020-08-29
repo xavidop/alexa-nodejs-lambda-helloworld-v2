@@ -17,7 +17,3 @@ jobs:
           chmod +x -R ./test;
           ls -la
         working-directory: /home/node/app
-  build:
-    runs-on: ubuntu-latest
-    name: Build
-    needs: checkout
