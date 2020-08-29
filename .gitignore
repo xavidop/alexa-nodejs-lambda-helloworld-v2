@@ -3,10 +3,12 @@ package-lock.json
 .DS_Store
 test-results.xml
 eslint.xml
-lambda/custom/src/package.json
+lambda/src/package.json
 mochawesome-report/
 .nyc_output/
 *.lcov
 test_output/
 *.log
 build.zip
+report.html
+*.html
