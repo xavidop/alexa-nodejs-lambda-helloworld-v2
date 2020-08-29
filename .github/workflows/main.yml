@@ -9,8 +9,28 @@ jobs:
       # you must check out the repository
       - name: Checkout
         uses: actions/checkout@v2
-      - name: test
+      - name: Alexa Action
         uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
       - run: |
           chmod +x -R ./test;
           ls -la
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: code
+          path: ${{ github.workspace }}
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    needs: checkout
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Download results
+      uses: actions/download-artifact@v2
+      with:
+        name: code
+    - name: Alexa Action
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+    - run: |
+        cd lambda/ && npm install
