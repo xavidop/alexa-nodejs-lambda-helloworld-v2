@@ -96,6 +96,7 @@ jobs:
       uses: actions/checkout@v2
     - run: |
         sudo npm install -g ask-cli;
+        sudo apt-get install -y jq
         cd lambda;
         npm install;
         npm run copy-package;
@@ -113,7 +114,6 @@ jobs:
 
   check-utterance-conflicts:
     runs-on: ubuntu-latest
-    container: xavidop/alexa-ask-aws-cli:latest
     name: Check Utterance Conflicts
     needs: deploy
     steps:
@@ -122,6 +122,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - run: |
+        sudo npm install -g ask-cli;
+        sudo apt-get install -y jq
         chmod +x -R ./test;
         cd test/vui-test/;
         ./interaction_model_checker.sh $SKILL_ID v2
@@ -136,7 +138,6 @@ jobs:
 
   check-utterance-resolution:
     runs-on: ubuntu-latest
-    container: xavidop/alexa-ask-aws-cli:latest
     name: Check Utterance Resolution
     needs: deploy
     steps:
@@ -145,6 +146,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - run: |
+        sudo npm install -g ask-cli;
+        sudo apt-get install -y jq
         chmod +x -R ./test;
         cd test/vui-test/;
         ./utterance_resolution_checker.sh $SKILL_ID v2
@@ -159,7 +162,6 @@ jobs:
 
   check-utterance-evaluation:
     runs-on: ubuntu-latest
-    container: xavidop/alexa-ask-aws-cli:latest
     name: Check Utterance Evaluation
     needs: deploy
     steps:
@@ -168,6 +170,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - run: |
+        sudo npm install -g ask-cli;
+        sudo apt-get install -y jq
         chmod +x -R ./test;
         cd test/vui-test/;
         ./utterance_evaluation_checker.sh $SKILL_ID v2
