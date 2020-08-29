@@ -10,9 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: test
-        uses: xavidop/alexa-ask-aws-cli-docker@v1
-        with:
-          ask-cli-version: '2.13.0'
+        uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
       - run: |
           echo $pwd;
           node -v
