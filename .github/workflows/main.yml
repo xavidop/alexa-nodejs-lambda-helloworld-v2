@@ -34,3 +34,53 @@ jobs:
       uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
     - run: |
         cd lambda/ && npm install
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: code
+        path: ${{ github.workspace }}
+
+  pretest:
+    runs-on: ubuntu-latest
+    name: Pre-test
+    needs: build
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Download results
+      uses: actions/download-artifact@v2
+      with:
+        name: code
+    - name: Alexa Action
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+    - run: |
+        cd lambda;
+        npm run lint;
+        npm run lint-html
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: code
+        path: ${{ github.workspace }}
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    needs: pretest
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Download results
+      uses: actions/download-artifact@v2
+      with:
+        name: code
+    - name: Alexa Action
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+    - run: |
+        cd lambda;
+        npm run test
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: code
+        path: ${{ github.workspace }}
