@@ -87,32 +87,23 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    container: xavidop/alexa-ask-aws-cli:latest
     name: Deploy
     needs: codecov
     steps:
     # To use this repository's private action,
     # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
     - run: |
-        echo $PWD;
-        git clone https://github.com/${GITHUB_REPOSITORY}.git
-        cd alexa-nodejs-lambda-helloworld-v2;
-        chmod 777 -R ./
-        ls -la;
-        cd lambda/src;
-        whoami;
+        cd lambda;
+        npm install -g ask-cli;
         npm install;
-        echo $PWD;
-        whoami;
         npm run copy-package;
-        whoami;
         cd src;
         npm run build-production
-      working-directory: /home/node/app
     - run: ask deploy --ignore-hash  
-      working-directory: /home/node/app/alexa-nodejs-lambda-helloworld-v2/
+      working-directory: /home/node/app
       env: # Or as an environment variable
-        GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
         ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
