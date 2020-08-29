@@ -26,10 +26,10 @@ jobs:
     steps:
     # To use this repository's private action,
     # you must check out the repository
-    - name: Download results
-      uses: actions/download-artifact@v2
-      with:
-        name: code
+      # To use this repository's private action,
+      # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Alexa Action
       uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
     - run: |
@@ -48,15 +48,15 @@ jobs:
     steps:
     # To use this repository's private action,
     # you must check out the repository
-    - name: Download results
-      uses: actions/download-artifact@v2
-      with:
-        name: code
+      # To use this repository's private action,
+      # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Alexa Action
       uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
     - run: |
         cd lambda;
-        chmod +x -R node_modules/
+        npm install;
         npm run lint;
         npm run lint-html
     - name: Upload results
@@ -72,14 +72,13 @@ jobs:
     steps:
     # To use this repository's private action,
     # you must check out the repository
-    - name: Download results
-      uses: actions/download-artifact@v2
-      with:
-        name: code
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Alexa Action
       uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
     - run: |
         cd lambda;
+        npm install;
         npm run test
     - name: Upload results
       uses: actions/upload-artifact@v2
