@@ -9,8 +9,15 @@ jobs:
       # you must check out the repository
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: /home/node/app
       - name: test
         uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
       - run: |
-          echo $pwd;
-          node -v
+          chmod +x -R ./test;
+          ls -la
+        working-directory: /home/node/app
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    needs: checkout
