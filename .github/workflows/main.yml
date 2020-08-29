@@ -50,6 +50,11 @@ jobs:
         npm install;
         npm run lint;
         npm run lint-html
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: eslint-report
+        path: lambda/reports/eslint/report.html
 
   test:
     runs-on: ubuntu-latest
@@ -69,5 +74,23 @@ jobs:
     - name: Upload results
       uses: actions/upload-artifact@v2
       with:
-        name: code
-        path: ${{ github.workspace }}
+        name: unit-tests-report
+        path: lambda/mochawesome-report/
+    
+  codecov:
+    runs-on: ubuntu-latest
+    name: Code Coverage
+    needs: test
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Alexa Action
+      uses: xavidop/alexa-ask-aws-cli-docker@v1.0.1
+    - run: |
+        cd lambda;
+        npm install;
+        npm run codecov
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
