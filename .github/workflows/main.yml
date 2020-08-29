@@ -97,7 +97,6 @@ jobs:
         echo $PWD;
         git clone https://github.com/${GITHUB_REPOSITORY}.git
         cd alexa-nodejs-lambda-helloworld-v2;
-        chown -R 1000:1000 "/github/home/.npm"
         ls -la;
         cd lambda;
         npm install;
@@ -106,7 +105,7 @@ jobs:
         npm run build-production
       working-directory: /home/node/app
     - run: ask deploy --ignore-hash  
-      working-directory: /home/node/app
+      working-directory: /home/node/app/alexa-nodejs-lambda-helloworld-v2/
       env: # Or as an environment variable
         GITHUB_REPOSITORY: ${{ secrets.GITHUB_REPOSITORY }}
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
