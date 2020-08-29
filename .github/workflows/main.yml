@@ -94,7 +94,10 @@ jobs:
     # To use this repository's private action,
     # you must check out the repository
     - run: |
+        echo $PWD;
         git clone https://github.com/${GITHUB_REPOSITORY}.git
+        cd alexa-nodejs-lambda-helloworld-v2;
+        ls -la;
         cd lambda;
         npm install;
         npm run copy-package;
