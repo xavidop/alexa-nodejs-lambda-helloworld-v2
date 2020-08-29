@@ -110,7 +110,7 @@ jobs:
         cd lambda;
         npm install;
         npm run copy-package;
-        cd lambda/src;
+        cd src;
         npm run build-production
     - run: ask deploy --ignore-hash
       env: # Or as an environment variable
