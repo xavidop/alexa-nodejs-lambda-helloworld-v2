@@ -231,7 +231,7 @@ jobs:
   submit:
     runs-on: ubuntu-latest
     name: Submit
-    needs: integration-test
+    needs: validation-test
     steps:
     # To use this repository's private action,
     # you must check out the repository
