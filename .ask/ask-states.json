@@ -9,8 +9,8 @@
               "iamRole": "arn:aws:iam::141568529918:role/ask-lambda-alexa-nodejs-lambda-helloworld-v2-1598694434658",
               "lambda": {
                 "arn": "arn:aws:lambda:us-east-1:141568529918:function:ask-alexa-nodejs-lambda-he-default-default-1598694445212",
-                "lastModified": "2020-08-29T10:32:34.600+0000",
-                "revisionId": "911ed1e7-65b4-4cc1-ac12-1e3e719d40dc"
+                "lastModified": "2020-08-29T10:40:58.405+0000",
+                "revisionId": "eeeee1c4-2c47-463c-927f-ef3074753dbd"
               }
             }
           }
@@ -22,7 +22,7 @@
       },
       "code": {
         "default": {
-          "lastDeployHash": "XhrPIosMlvtxmQLLLnzW6K/IJy0="
+          "lastDeployHash": "1tYE/EFqTNpN6n/m66RegKKtlow="
         }
       }
     }

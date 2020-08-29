@@ -9,3 +9,4 @@ mochawesome-report/
 *.lcov
 test_output/
 *.log
+build.zip
