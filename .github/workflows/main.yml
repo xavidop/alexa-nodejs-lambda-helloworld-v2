@@ -101,7 +101,7 @@ jobs:
         npm run copy-package;
         cd src;
         npm run build-production
-    - run: ask deploy --ignore-hash  
+    - run: ls -la && ask deploy --ignore-hash  
       env: # Or as an environment variable
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
