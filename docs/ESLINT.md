@@ -5,13 +5,13 @@ maintainable and clear code, in short, to generate clean code.
 
 During the development of code (modules, libraries) it is important to integrate objective tools that measure the status of the code and provide the information to know its quality and thus be able to detect and prevent problems: duplicate functions, excessively complex methods, code low quality, non-standard coding style.
 
-These checks are automated in the continuous integration system (CircleCI) and are executed in each new version of the software.
+These checks are automated in the continuous integration system (GitHub Actions) and are executed in each new version of the software.
 
 ## Prerequisites
 
 Here you have the technologies used in this project
 1. ASK CLI - [Install and configure ASK CLI](https://developer.amazon.com/es-ES/docs/alexa/smapi/quick-start-alexa-skills-kit-command-line-interface.html)
-2. CircleCI Account - [Sign up here](https://circleci.com/)
+2. GitHub Account - [Sign up here](https://github.com/)
 3. Node.js v10.x
 4. Visual Studio Code
 
@@ -91,9 +91,7 @@ It is something like `.gitignore` file:
 Once we have everything configured, we have to set up the reports we are going to use to check our code quality.
 
 The first report we need to set up is the JUnit report. 
-This report will generate a .xml file as output that CircleCI is going to use to print the lint results:
-
-![image](../img/eslintcircleci.png)
+This report will generate a .xml file as output. You can use this output to import it in another CI system.
 
 We are going to move one step forward. We want to know a little bit more about our ESLint analysis in every pipeline execution.
 
@@ -107,7 +105,7 @@ This is how this report looks like:
 
 ![image](../img/eslinthtml.png)
 
-All these reports will be stored in `lambda/custom/reports/eslint/` folder.
+All these reports will be stored in `lambda/reports/eslint/` folder.
 
 ### Integration
 
@@ -127,37 +125,40 @@ So, in this file we are going to add the following commands in the `script` json
 Everything is fully installed, configured and integrated, let's add it to our pipeline!
 
 This job will execute the following tasks:
-1. Restore the code that we have downloaded in the previous step in `/home/node/project` folder
+1. Checkout the code 
 2. Run `npm run lint` to execute the ESLint checker.
 3. Run `npm run lint-html` to execute the ESLint HTML report. It will be executed always either the job success or fails.
-4. Store the JUnit report as CircleCi test artifacts.
+4. Store the JUnit report as GitHub Actions test artifacts.
 5. Store the HTML report as an artifact of this job.
-6. Persist again the code that we will reuse in the next job
 
 ```yaml
   pretest:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Pre-test
+    needs: build
     steps:
-      - attach_workspace:
-          at: /home/node/
-      - run: cd lambda/custom && npm run lint
-      - run: 
-          command: cd lambda/custom && npm run lint-html
-          when: always
-      - store_test_results:
-          path: lambda/custom/reports/eslint/
-      - store_artifacts:
-          path: ./lambda/custom/reports/eslint/
-      - persist_to_workspace:
-          root: /home/node/
-          paths:
-            - project
+    # To use this repository's private action,
+    # you must check out the repository
+      # To use this repository's private action,
+      # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        cd lambda;
+        npm install;
+        npm run lint;
+        npm run lint-html
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: eslint-report
+        path: lambda/reports/eslint/
 ```
 
 ## Resources
 * [DevOps Wikipedia](https://en.wikipedia.org/wiki/DevOps) - Wikipedia reference
 * [Official ESLint Documentation](https://eslint.org/) - Official ESLint Documentation
-* [Official CircleCI Documentation](https://circleci.com/docs/) - Official CircleCI Documentation
+* [Official GitHub Actions Documentation](https://docs.github.com/) - Official GitHub Actions Documentation
 
 ## Conclusion 
 

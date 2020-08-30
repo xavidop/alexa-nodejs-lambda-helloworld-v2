@@ -5,13 +5,13 @@ According to the Wikipedia definition, "the Voice User Interface (VUI) enables h
 Thanks to machine learnig, big data, cloud and artificial intelligence we have managed to communicate with "computers" through the most natural way of communication of the human being: speech.
 
 One of the most important steps in our pipeline is to test the VUI because is the frontend of our Alexa Skill.
-These tests are automated in the continuous integration system (CircleCI) and are executed in each new version of the software.
+These tests are automated in the continuous integration system (GitHub Actions) and are executed in each new version of the software.
 
 ## Prerequisites
 
 Here you have the technologies used in this project
 1. ASK CLI - [Install and configure ASK CLI](https://developer.amazon.com/es-ES/docs/alexa/smapi/quick-start-alexa-skills-kit-command-line-interface.html)
-2. CircleCI Account - [Sign up here](https://circleci.com/)
+2. GitHub Account - [Sign up here](https://github.com/)
 3. Node.js v10.x
 4. Visual Studio Code
 
@@ -23,7 +23,7 @@ We will use this powerful tool to test our Voice User Interface. Let's start!
 
 ### Installation
 
-The ASK CLI is included in the [Docker image](https://hub.docker.com/repository/docker/xavidop/alexa-ask-aws-cli) we are using so it is not necessary to install anything else.
+We need to install the ASK CLI or use it as it is included in the [Docker image](https://hub.docker.com/repository/docker/xavidop/alexa-ask-aws-cli) and the [GitHub Action](https://github.com/marketplace/actions/alexa-ask-aws-cli-action).
 
 ### Writing Tests
 
@@ -61,9 +61,9 @@ Here you can find the full bash script:
 
     if [[ ${cli_version} == *"v1"* ]]
     then
-        folder="../models/*"
+        folder="../../models/*"
     else
-        folder="../skill-package/interactionModels/*"
+        folder="../../skill-package/interactionModels/custom/*"
     fi
 
     for d in ${folder}; do
@@ -86,7 +86,6 @@ Here you can find the full bash script:
         if [[ -z ${number_conflicts} || ${number_conflicts} == "null" ]]
         then
             echo "No Conflicts detected"
-            exit 0
         else
             echo "Number of conflicts detected: ${number_conflicts}"
             echo "Conflicts: ${conflicts}"
@@ -137,7 +136,7 @@ Here you can find the full bash script:
     then
         folder="../models/*"
     else
-        folder="../skill-package/interactionModels/*"
+        folder="../skill-package/interactionModels/custom/*"
     fi
 
     for d in  ${folder}; do
@@ -244,7 +243,7 @@ Here you can find the full bash script:
     then
         folder="../models/*"
     else
-        folder="../skill-package/interactionModels/*"
+        folder="../skill-package/interactionModels/custom/*"
     fi
 
     for d in ${folder}; do
@@ -314,7 +313,7 @@ Additionally, we have a set of annotations depending on the locale.
 These set of annotations to tests are available in `test\utterance_evaluation`. In our case, this is skill it is only available in Spanish so you can find in that folder the file `es-ES`:
 
 ```bash
-    bcdcd3d8-ed74-4751-bb9f-5d1a4d02259c
+   66a277da-7a4a-46fb-b601-82c6ddd5151d
 ```
 
 As you can see, this is the id of the annotation we have created in the Alexa Developer Console. If you have more than one, just add it in a new line.
@@ -342,60 +341,103 @@ These 3 tests described above are defined in three different jobs that will run 
 ### 1. check-utterance-conflicts
 
 This job will execute the following tasks:
-1. Restore the code that we have downloaded in the previous step in `/home/node/project` folder
+1. Checkout the code 
 2. Run the `interaction_model_checker` script.
 
 ```yaml
   check-utterance-conflicts:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Check Utterance Conflicts
+    needs: deploy
     steps:
-      - attach_workspace:
-          at: /home/node/
-      - run: cd test/vui-test/ && ./interaction_model_checker.sh $SKILL_ID v1
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        sudo npm install -g ask-cli;
+        chmod +x -R ./test;
+        cd test/vui-test/;
+        ./interaction_model_checker.sh $SKILL_ID v2
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
 ```
 
 ### 2. check-utterance-resolution
 
 This job will execute the following tasks:
-1. Restore the code that we have downloaded in the previous step in `/home/node/project` folder
+1. Checkout the code 
 2. Run the `utterance_resolution_checker` script.
 
 ```yaml
   check-utterance-resolution:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Check Utterance Resolution
+    needs: deploy
     steps:
-      - attach_workspace:
-          at: /home/node/
-      - run: cd test/vui-test/ && ./utterance_resolution_checker.sh $SKILL_ID v1
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        sudo npm install -g ask-cli;
+        chmod +x -R ./test;
+        cd test/vui-test/;
+        ./utterance_resolution_checker.sh $SKILL_ID v2
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
 ```
 
 ### 3. check-utterance-evaluation
 
 This job will execute the following tasks:
-1. Restore the code that we have downloaded in the previous step in `/home/node/project` folder
+1. Checkout the code 
 2. Run the `utterance_evaluation_checker` script.
-3. Persist again the code that we will reuse in the next job
 
 ```yaml
   check-utterance-evaluation:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Check Utterance Evaluation
+    needs: deploy
     steps:
-      - attach_workspace:
-          at: /home/node/
-      - run: cd test/vui-test/ && ./utterance_evaluation_checker.sh $SKILL_ID v1
-      - persist_to_workspace:
-          root: /home/node/
-          paths:
-            - project
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        sudo npm install -g ask-cli;
+        chmod +x -R ./test;
+        cd test/vui-test/;
+        ./utterance_evaluation_checker.sh $SKILL_ID v2
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
 ```
 
-**NOTE:** To perform these tests in CircleCI you have to set the environment variable `SKILL_ID` with the id of your Alexa Skill.
+**NOTE:** To perform these tests in Github Actions you have to set the secret `SKILL_ID` with the id of your Alexa Skill.
 
 
 ## Resources
 * [DevOps Wikipedia](https://en.wikipedia.org/wiki/DevOps) - Wikipedia reference
 * [Official Alexa Skill Management API Documentation](https://developer.amazon.com/es-ES/docs/alexa/smapi/skill-testing-operations.html) - Alexa Skill Management API Documentation
-* [Official CircleCI Documentation](https://circleci.com/docs/) - Official CircleCI Documentation
+* [Official GitHub Actions Documentation](https://docs.github.com/) - Official GitHub Actions Documentation
 
 ## Conclusion 
 

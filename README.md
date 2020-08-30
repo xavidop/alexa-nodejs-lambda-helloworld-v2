@@ -78,35 +78,35 @@ These are the main files of the project:
 ```bash
 
     ├───.ask
-    │       config
-    │
+    │       ask-states.json
     ├───.vscode
     │       launch.json
-    ├───hooks
     ├───lambda
-    │   └───custom
-    │        ├───test
-    │        │    └─── helloworld-tests.js
-    │        └───src
-    │             ├───errors
-    │             ├───intents
-    │             ├───interceptors
-    │             ├─── utilities
-    │             ├─── index.js
-    │             ├─── local-debugger.js
-    │             └─── package.json
-    ├───models
-    │       es-ES.json
-    └───skill.json
+    │    ├─── local-debugger.js
+    │    ├───test
+    │    │    └─── helloworld-tests.js
+    │    └───src
+    │         ├───errors
+    │         ├───intents
+    │         ├───interceptors
+    │         ├─── utilities
+    │         ├─── index.js
+    │         └─── package.json
+    ├───skill-package
+    │    ├───interactionModels
+    │    │    └─── custom
+    │    │           └─── es-ES.json
+    │    ├───asstes
+    │    │    └─── en-US_largeIcon
+    │    └─── skill.json
+    ├──ask-resources.json
+
 
 ```
 
 * .ask: folder which contains the ASK CLI's config file. This config files will remain empty until we execute the command `ask deploy`
-* `.vscode/launch.json`: Launch preferences to run locally your Skill for local testing. This setting launch `lambda/custom/local-debugger.js`. This script runs a server on http://localhost:3001 for debug the Skill.
-* hooks: A folder that contains the hook scripts. Amazon provides two hooks, post_new_hook and pre_deploy_hook.
-  * `post_new_hook`: executed after the Skill creation. Inn Node.js runs `npm install` in each sourceDir in `skill.json`
-  * `pre_deploy_hook`: executed before the Skill deployment. In Node.js runs `npm install` in each sourceDir in `skill.json` as well.
-* lambda/custom/src/: A folder that contains the source code for the skill's AWS Lambda function:
+* `.vscode/launch.json`: Launch preferences to run locally your Skill for local testing. This setting launch `lambda/local-debugger.js`. This script runs a server on http://localhost:3001 for debug the Skill.
+* lambda/src/: A folder that contains the source code for the skill's AWS Lambda function:
   * `index.js`: the lambda main entry point.
   * `utilities/languageStrings.js`: i18n dictionaries used by the library `i18next` which allow us to run same in Skill in different configuration languages.
   * `package.json`: this file is core to the Node.js ecosystem and is a basic part of understanding and working with Node.js, npm, and even modern JavaScript
@@ -115,9 +115,11 @@ These are the main files of the project:
   * `errors`: folder that contains all Error handlers.
   * `intents`: folder that contains all Intent handlers.
   * `interceptors`: here you can find all interceptors.
-* lambda/custom/test/: A folder that contains the source code for tests.
-* models – A folder that contains interaction models for the skill. Each interaction model is defined in a JSON file named according to the locale. For example, es-ES.json.
-* `skill.json` – The skill manifest. One of the most important files in our project.
+* lambda/test/: A folder that contains the source code for tests.
+  * interactionModels/custom – A folder that contains interaction models for the skill. Each interaction model is defined in a JSON file named according to the locale. For example, es-ES.json.
+  * assets – A folder that contains all the assets for the skill. For example, te icon of the Alexa Skill.
+  * `skill.json` – The skill manifest. One of the most important files in our project.
+* `ask-resources.json` – In this file we will setup the folders of the lambda code and the skill-package.
 
 
 ## Lambda function in Javascript
@@ -126,7 +128,7 @@ The ASK SDK for Node.js makes it easier for you to build highly engaging skills 
 
 You can find documentation, samples and helpful links in their official [GitHub repository](https://github.com/alexa/alexa-skills-kit-sdk-for-nodejs)
 
-The main Javascript file in our lambda project is `index.js` located in `lambda/custom/src` folder. This file contains all handlers, interceptors and exports the Skill handler in `exports.handler`.
+The main Javascript file in our lambda project is `index.js` located in `lambda/src` folder. This file contains all handlers, interceptors and exports the Skill handler in `exports.handler`.
 
 The `exports.handler` function is executed every time AWS Lambda is initiated for this particular function. 
 In theory, an AWS Lambda function is just a single function. This means that we need to define dispatching logic so a single function request can route to appropriate code, hence the handlers.
@@ -236,12 +238,12 @@ The `launch.json` file in `.vscode` folder has the configuration for Visual Stud
             "request": "launch",
             "name": "Launch Skill",
             // Specify path to the downloaded local adapter(for Node.js) file
-            "program": "${workspaceRoot}/lambda/custom/local-debugger.js",
+            "program": "${workspaceRoot}/lambda/local-debugger.js",
             "args": [
                 // port number on your local host where the alexa requests will be routed to
                 "--portNumber", "3001",
                 // name of your Node.js main skill file
-                "--skillEntryFile", "${workspaceRoot}/lambda/custom/src/index.js",
+                "--skillEntryFile", "${workspaceRoot}/lambda/src/index.js",
                 // name of your lambda handler
                 "--lambdaHandler", "handler"
             ]
@@ -254,7 +256,7 @@ This configuration file will execute the following command:
 
 ```bash
 
-  node --inspect-brk=28448 lambda\custom\local-debugger.js --portNumber 3001 --skillEntryFile lambda/custom/src/index.js --lambdaHandler handler
+  node --inspect-brk=28448 lambda\local-debugger.js --portNumber 3001 --skillEntryFile lambda/src/index.js --lambdaHandler handler
 
 ```
 
@@ -332,19 +334,21 @@ For example, you can test a `LaunchRequest`:
 
 With the code ready to go, we need to deploy it on AWS Lambda so it can be connected to Alexa.
 
-Before deploy the Alexa Skill, we can show the `config` file in `.ask` folder it is empty:
+Before deploy the Alexa Skill, we can show the `ask-states.json` file in `.ask` folder it is empty:
 
 ```json
-    {
-      "deploy_settings": {
-        "default": {
-          "skill_id": "",
-          "was_cloned": false,
-          "merge": {}
+  {
+    "askcliStatesVersion": "2020-03-31",
+    "profiles": {
+      "default": {
+        "skillInfrastructure": {
+          "@ask-cli/lambda-deployer": {
+            "deployState": {}
+          }
         }
       }
     }
-
+  }
 ```
 
 Deploy Alexa Skill with ASK CLI:
@@ -368,38 +372,35 @@ After the execution of the above command, we will have the `config` file properl
 ```json
 
   {
-    "deploy_settings": {
-      "default": {
-        "skill_id": "amzn1.ask.skill.ed038d5e-61eb-4383-a480-04e3398b398d",
-        "was_cloned": false,
-        "merge": {},
-        "resources": {
-          "manifest": {
-            "eTag": "faa883c92faf9a495407f0d03d5e3790"
-          },
-          "interactionModel": {
-            "es-ES": {
-              "eTag": "c9e7fd862be0dd3b21252b8bca53c7f7"
+  "askcliStatesVersion": "2020-03-31",
+  "profiles": {
+    "default": {
+      "skillInfrastructure": {
+        "@ask-cli/lambda-deployer": {
+          "deployState": {
+            "default": {
+              "iamRole": "arn:aws:iam::141568529918:role/ask-lambda-alexa-nodejs-lambda-helloworld-v2-1598694434658",
+              "lambda": {
+                "arn": "arn:aws:lambda:us-east-1:141568529918:function:ask-alexa-nodejs-lambda-he-default-default-1598694445212",
+                "lastModified": "2020-08-29T10:40:58.405+0000",
+                "revisionId": "eeeee1c4-2c47-463c-927f-ef3074753dbd"
+              }
             }
-          },
-          "lambda": [
-            {
-              "alexaUsage": [
-                "custom/default"
-              ],
-              "arn": "arn:aws:lambda:us-east-1:141568529918:function:ask-custom-alexa-nodejs-lambda-helloworld-default",
-              "awsRegion": "us-east-1",
-              "codeUri": "lambda/custom/src",
-              "functionName": "ask-custom-alexa-nodejs-lambda-helloworld-default",
-              "handler": "index.handler",
-              "revisionId": "ef2707ee-a366-484d-a4b7-3826a44692dd",
-              "runtime": "nodejs10.x"
-            }
-          ]
+          }
+        }
+      },
+      "skillId": "amzn1.ask.skill.a37d291d-4f48-46e0-8149-20fcbb1dda36",
+      "skillMetadata": {
+        "lastDeployHash": "akfVROzLAyhVmotpASooDMTXGn4="
+      },
+      "code": {
+        "default": {
+          "lastDeployHash": "1tYE/EFqTNpN6n/m66RegKKtlow="
         }
       }
     }
   }
+}
 
 ```
 

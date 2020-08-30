@@ -4,13 +4,13 @@ A unit test is method that calls functions or piece of codes from your source co
 and then validates if the output is the one that you want to expect. Thus, these tests validates if the result is the one expected.
 The method or function to be tested is known as System under test (SUT).
 
-These tests are automated in the continuous integration system (CircleCI) and are executed in each new version of the software.
+These tests are automated in the continuous integration system (GitHub Actions) and are executed in each new version of the software.
 
 ## Prerequisites
 
 Here you have the technologies used in this project
 1. ASK CLI - [Install and configure ASK CLI](https://developer.amazon.com/es-ES/docs/alexa/smapi/quick-start-alexa-skills-kit-command-line-interface.html)
-2. CircleCI Account - [Sign up here](https://circleci.com/)
+2. GitHub Account - [Sign up here](https://github.com/)
 3. Node.js v10.x
 4. Visual Studio Code
 
@@ -133,9 +133,7 @@ We need to install this output format of the report:
     npm install mocha-junit-reporter --save-dev 
 ```
 
-This report will generate a .xml file as output that CircleCI is going to use to print the lint results:
-
-![image](../img/mochacircleci.png)
+This report will generate a .xml file as output. You can use this output to import it in another CI system.
 
 We are going to move one step forward. We want to know a little bit more about our unit tests results in every pipeline execution.
 
@@ -158,7 +156,7 @@ Finally, in order to generate two reports with just one command we will install 
 
 Then we have to configure this npm package to specify the two reporters we are going to run ant its configuration. 
 
-The configuration file is `mocha.json` file in `lambda/custom` folder:
+The configuration file is `mocha.json` file in `lambda/` folder:
 
 ```json
     {
@@ -169,7 +167,7 @@ The configuration file is `mocha.json` file in `lambda/custom` folder:
     }  
 ```
 
-The JUnit report will be stored in `lambda/custom/reports/mocha/` folder and the HTML one will be stored in `lambda/custom/mochawesome-report`.
+The JUnit report will be stored in `lambda/reports/mocha/` folder and the HTML one will be stored in `lambda/mochawesome-report`.
 
 ### Integration
 
@@ -185,33 +183,41 @@ So, in this file we are going to add the following commands in the `script` json
 Everything is fully installed, configured and integrated, let's add it to our pipeline!
 
 This job will execute the following tasks:
-1. Restore the code that we have downloaded in the previous step in `/home/node/project` folder
+1. Checkout the code 
 2. Run `npm run test` to execute the unit tests.
-3. Store the JUnit report as CircleCi test artifacts.
-4. Store the HTML report as an CircleCi artifact of this job.
-5. Persist again the code that we will reuse in the next job
+3. Store the JUnit report as GitHub Actions test artifacts.
+4. Store the HTML report as an GitHub Actions artifact of this job.
 
 ```yaml
   test:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Test
+    needs: pretest
     steps:
-      - attach_workspace:
-          at: /home/node/
-      - run: cd lambda/custom && npm run test
-      - store_test_results:
-          path: lambda/custom/reports/mocha/
-      - store_artifacts:
-          path: ./lambda/custom/mochawesome-report/
-      - persist_to_workspace:
-          root: /home/node/
-          paths:
-            - project
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        cd lambda;
+        npm install;
+        npm run test
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: unit-tests-report-html
+        path: lambda/mochawesome-report/
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: unit-tests-report-xml
+        path: lambda/reports/mocha/
 ```
 
 ## Resources
 * [DevOps Wikipedia](https://en.wikipedia.org/wiki/DevOps) - Wikipedia reference
 * [Official Alexa SDK Test Framework Documentation](https://github.com/taimos/ask-sdk-test) - Alexa SDK Test Framework Documentation
-* [Official CircleCI Documentation](https://circleci.com/docs/) - Official CircleCI Documentation
+* [Official GitHub Actions Documentation](https://docs.github.com/) - Official GitHub Actions Documentation
 
 ## Conclusion 
 

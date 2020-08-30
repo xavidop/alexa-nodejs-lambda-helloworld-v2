@@ -4,13 +4,13 @@ There is another important step in an Alexa Skill development process. It is not
 This step is the validation of our Alexa Skill before submitting it to certification. It means that the metadata of our Skill (logos, description, examples, etc) are properly filled. We can check it in our pipeline thanks to the ASK CLI and the use of the Alexa Skill Management API.
 
 One of the most important steps in our pipeline is to validate our Alexa Skill.
-These tests are automated in the continuous integration system (CircleCI) and are executed in each new version of the software.
+These tests are automated in the continuous integration system (GitHub Actions) and are executed in each new version of the software.
 
 ## Prerequisites
 
 Here you have the technologies used in this project
 1. ASK CLI - [Install and configure ASK CLI](https://developer.amazon.com/es-ES/docs/alexa/smapi/quick-start-alexa-skills-kit-command-line-interface.html)
-2. CircleCI Account - [Sign up here](https://circleci.com/)
+2. GitHub Account - [Sign up here](https://github.com/)
 3. Node.js v10.x
 4. Visual Studio Code
 
@@ -22,7 +22,7 @@ We will use this powerful tool to validate our Alexa Skill. Let's start!
 
 ### Installation
 
-The ASK CLI is included in the [Docker image](https://hub.docker.com/repository/docker/xavidop/alexa-ask-aws-cli) we are using so it is not necessary to install anything else.
+We need to install the ASK CLI or use it as it is included in the [Docker image](https://hub.docker.com/repository/docker/xavidop/alexa-ask-aws-cli) and the [GitHub Action](https://github.com/marketplace/actions/alexa-ask-aws-cli-action).
 
 ### Writing the test
 
@@ -64,7 +64,7 @@ Here you can find the full bash script:
     then
         folder="../../models/*"
     else
-        folder="../../skill-package/interactionModels/*"
+        folder="../../skill-package/interactionModels/custom/*"
     fi
 
 
@@ -142,30 +142,41 @@ It is not necessary to integrate it in `package.json` file.
 Everything is ready to run and validate our Alexa Skill, let's add it to our pipeline!
 
 This job will execute the following tasks:
-1. Restore the code that we have downloaded in the previous step in `/home/node/project` folder
+1. Checkout the code 
 2. Run the `skill_validation_checker` script.
-3. Persist again the code that we will reuse in the next job
 
 ```yaml
   validation-test:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Validation test
+    needs: end-to-test
     steps:
-      - attach_workspace:
-          at: /home/node/
-      - run: cd test/validation-test/ && ./skill_validation_checker.sh $SKILL_ID v1
-      - persist_to_workspace:
-          root: /home/node/
-          paths:
-            - project
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        sudo npm install -g ask-cli;
+        chmod +x -R ./test;
+        cd test/validation-test/;
+        ./skill_validation_checker.sh $SKILL_ID v2
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
 ```
 
-**NOTE:** To perform these tests in CircleCI you have to set the environment variable `SKILL_ID` with the id of your Alexa Skill.
+**NOTE:** To perform these tests in GitHub Actions you have to set the secret `SKILL_ID` with the id of your Alexa Skill.
 
 
 ## Resources
 * [DevOps Wikipedia](https://en.wikipedia.org/wiki/DevOps) - Wikipedia reference
 * [Official Alexa Skill Management API Documentation](https://developer.amazon.com/es-ES/docs/alexa/smapi/skill-testing-operations.html) - Alexa Skill Management API Documentation
-* [Official CircleCI Documentation](https://circleci.com/docs/) - Official CircleCI Documentation
+* [Official GitHub Actions Documentation](https://docs.github.com/) - Official GitHub Actions Documentation
 
 ## Conclusion 
 

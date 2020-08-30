@@ -18,8 +18,6 @@ jobs:
     name: Build
     needs: checkout
     steps:
-    # To use this repository's private action,
-    # you must check out the repository
       # To use this repository's private action,
       # you must check out the repository
     - name: Checkout
@@ -48,7 +46,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: eslint-report
-        path: lambda/reports/eslint/report.html
+        path: lambda/reports/eslint/
 
   test:
     runs-on: ubuntu-latest
@@ -66,8 +64,13 @@ jobs:
     - name: Upload results
       uses: actions/upload-artifact@v2
       with:
-        name: unit-tests-report
+        name: unit-tests-report-html
         path: lambda/mochawesome-report/
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: unit-tests-report-xml
+        path: lambda/reports/mocha/
     
   codecov:
     runs-on: ubuntu-latest
@@ -204,11 +207,39 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         SKILL_ID: ${{ secrets.SKILL_ID }}
+
+  end-to-test:
+    runs-on: ubuntu-latest
+    name: End-to-end test
+    needs: integration-test
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        sudo npm install -g ask-cli;
+        sudo npm install -g bespoken-tools;
+        chmod +x -R ./test;
+        
+      env: # Or as an environment variable
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
+        ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
+        ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SKILL_ID: ${{ secrets.SKILL_ID }}
+    - name: Upload code
+      uses: actions/upload-artifact@v2
+      with:
+        name: bespoken-report
+        path: test_output/
   
   validation-test:
     runs-on: ubuntu-latest
     name: Validation test
-    needs: integration-test
+    needs: end-to-test
     steps:
     # To use this repository's private action,
     # you must check out the repository
@@ -251,25 +282,17 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         SKILL_ID: ${{ secrets.SKILL_ID }}
 
-  # end-to-test:
-  #   runs-on: ubuntu-latest
-  #   name: End-to-end test
-  #   needs: integration-test
-  #   steps:
-  #   # To use this repository's private action,
-  #   # you must check out the repository
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
-  #   - run: |
-  #       sudo npm install -g ask-cli;
-  #       sudo npm install -g bespoken-tools;
-  #       chmod +x -R ./test;
-  #       bst test --config test/e2e-bespoken-test/testing.json
-  #     env: # Or as an environment variable
-  #       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  #       ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
-  #       ASK_REFRESH_TOKEN: ${{ secrets.ASK_REFRESH_TOKEN }}
-  #       ASK_VENDOR_ID: ${{ secrets.ASK_VENDOR_ID }}
-  #       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       SKILL_ID: ${{ secrets.SKILL_ID }}
+  store-artifacts:
+    runs-on: ubuntu-latest
+    name: Submit
+    needs: submit
+    steps:
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2}
+    - name: Upload code
+      uses: actions/upload-artifact@v2
+      with:
+        name: code
+        path: ${{ github.workspace }}

@@ -2,11 +2,11 @@
 [![codecov](https://codecov.io/gh/xavidop/alexa-nodejs-lambda-helloworld-v2/branch/master/graph/badge.svg)](https://codecov.io/gh/xavidop/alexa-nodejs-lambda-helloworld-v2)
 
 # DevOps your Skill
+
 <!-- TOC -->
 
 - [DevOps your Skill](#devops-your-skill)
   - [Prerequisites](#prerequisites)
-  - [Dockerfile](#dockerfile)
   - [Pipeline](#pipeline)
     - [Checkout](#checkout)
     - [Build](#build)
@@ -18,10 +18,10 @@
     - [Integration tests](#integration-tests)
     - [End to end tests](#end-to-end-tests)
     - [Validation tests](#validation-tests)
-    - [Store-artifacts](#store-artifacts)
-    - [Wait for Approval](#wait-for-approval)
     - [Submit](#submit)
+    - [Store-artifacts](#store-artifacts)
   - [Workflow](#workflow)
+  - [GitHub Action](#github-action)
   - [Resources](#resources)
   - [Conclusion](#conclusion)
 
@@ -39,7 +39,7 @@ Here you have the technologies used in this project
 1. Amazon Developer Account - [How to get it](http://developer.amazon.com/)
 2. AWS Account - [Sign up here for free](https://aws.amazon.com/)
 3. ASK CLI - [Install and configure ASK CLI](https://developer.amazon.com/es-ES/docs/alexa/smapi/quick-start-alexa-skills-kit-command-line-interface.html)
-4. CircleCI Account -  [Sign up here](https://circleci.com/)
+4. GitHub Account -  [Sign up here](https://github.com/)
 5. Visual Studio Code
 
 The Alexa Skills Kit Command Line Interface (ASK CLI) is a tool for you to manage your Alexa skills and related resources, such as AWS Lambda functions.
@@ -47,66 +47,53 @@ With ASK CLI, you have access to the Skill Management API, which allows you to m
 If you want how to create your Skill with the ASK CLI, please follow the first step explained in my [Node.js Skill sample](https://github.com/xavidop/alexa-nodejs-lambda-helloworld). 
 We are going to use this powerful tool to do some steps in our pipeline. Let's DevOps!
 
-## Dockerfile
-
-Before explain the pipeline, it is important to explain the Docker image we are going to use in this pipeline. 
-You can find all the explanation in [this repo](https://github.com/xavidop/alexa-ask-aws-cli-docker).
 
 ## Pipeline
 
 ![image](img/pipeline.png)
 
-Before explain the pipeline, it is worth noting the common part of the pipeline, the executor. An executor defines the underlying technology or environment in which to run a job. Set up your jobs to run in the docker, machine, macos or windows executor and specify an image with the tools and packages you need.
-In our case, we will use a docker executor using the docker image explained above:
-
-```yaml
-  executors:
-    ask-executor:
-      docker:
-        - image: xavidop/alexa-ask-aws-cli:1.0
-```
-
 Let's explain job by job what is happening in our powerful pipeline. 
-First of all, each box represented in the image above is a job and they will be defined below the `job` node in the CircleCI configuration file:
+First of all, each box on the left represented in the image above is a job and they will be defined below the `jobs` node in the GitHub Actions Workflow configuration file:
 
 ### Checkout
 
 The checkout job will execute the following tasks:
-1. Checkout the code in `/home/node/project`
-2. Bring execution permission to `node` user to be able to execute all the hooks
-3. Persist the code in order to reuse it in the next job
+1. Checkout the code 
+2. Bring execution permission to be able to execute all the tests
 
 ```yaml
   checkout:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Checkout
     steps:
-      - checkout
-      - run: chmod +x -R ./hooks
-      - persist_to_workspace:
-          root: /home/node/
-          paths:
-            - project
+      # To use this repository's private action,
+      # you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+      - run: |
+          chmod +x -R ./test;
+          ls -la
 ```
 
 ### Build
 
 The build job will execute the following tasks:
-1. Restore the code that we have downloaded in the previous step in `/home/node/project` folder
+1. Checkout the code.
 2. Run `npm install` in order to download all the Node.js dependencies, including dev dependencies.
-3. Persist again the code that we will reuse in the next job
 
 ```yaml
   build:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Build
+    needs: checkout
     steps:
-      - attach_workspace:
-          at: /home/node/
-      - run: ls -la
-      - run: cd lambda/custom && npm install
-      - persist_to_workspace:
-          root: /home/node/
-          paths:
-            - project
+      # To use this repository's private action,
+      # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+    - run: |
+        cd lambda;
+        npm install
 
 ```
 
@@ -142,110 +129,54 @@ These jobs will check the full system using the voice as input. Check the full e
 
 These jobs will validate your Alexa Skill before submitting it to certification. Check the full explanation [here](docs/VALIDATIONTESTS.md).
 
+### Submit
+
+These jobs will submit your Alexa Skill to certification. Check the full explanation [here](docs/SUBMIT.md).
+
 ### Store-artifacts
 
 The store-artifacts job will execute the following tasks:
 1. Restore the code that we have used in the previous step in `/home/node/project` folder
 2. Clean `node_modules` folder
-3. Store the entire code of our Alexa Skill as an artifact. It will be accessible in CircleCI whenever we want to check it out.
+3. Store the entire code of our Alexa Skill as an artifact. It will be accessible in GitHub Actions whenever we want to check it out.
 
 ```yaml
+
   store-artifacts:
-    executor: ask-executor
+    runs-on: ubuntu-latest
+    name: Submit
+    needs: submit
     steps:
-      - attach_workspace:
-          at: /home/node/
-      - run: ls -la
-      - run: rm -rf lambda/custom/node_modules
-      - store_artifacts:
-          path: ./
+    # To use this repository's private action,
+    # you must check out the repository
+    - name: Checkout
+      uses: actions/checkout@v2}
+    - name: Upload code
+      uses: actions/upload-artifact@v2
+      with:
+        name: code
+        path: ${{ github.workspace }}
 
 ```
-
-### Wait for Approval
-
-For times when you'd prefer to keep manual approvals in place, easily configure the manual approval process by adding to your workflow a special job containing a `type: approval` entry. This job it is needed in order to check whatever you want of your Alexa Skill before submitting it to certification and when everything is checked, you can approve or decline the execution.
-
-This job is a different job that only exists down the `workflows` node in the config file. It is not needed to add it as a `job`.
-
-```yaml
-
-  - wait-for-decision:
-      type: approval
-      requires:
-        - store-artifacts
-```
-
-### Submit
-
-These jobs will submit your Alexa Skill to certification. Check the full explanation [here](docs/SUBMIT.md).
 
 ## Workflow
 
-At the end of the CircleCi configuration file, we will define our pipeline as a CircleCI Workflow which will execute the jobs explained above:
+The GitHub Actions Workflow which will execute the jobs explained above configuration file is located in `.github/workflows/main.yml`.
 
-```yaml
-  workflows:
-    skill-pipeline:
-      jobs:
-        - checkout
-        - build:
-            requires:
-              - checkout
-        - pretest:
-            requires:
-              - build
-        - test:
-            requires:
-              - pretest
-        - codecov:
-            requires:
-              - test
-        - deploy:
-            requires:
-              - test
-        - check-utterance-conflicts:
-            requires:
-              - deploy
-        - check-utterance-resolution:
-            requires:
-              - deploy
-        - check-utterance-evaluation:
-            requires:
-              - deploy
-        - integration-test:
-            requires:
-              - check-utterance-evaluation
-        - end-to-end-test:
-            requires:
-              - integration-test
-        - validation-test:
-            requires:
-              - end-to-end-test
-        - store-artifacts:
-            requires:
-              - validation-test
-        - wait-for-decision:
-            type: approval
-            requires:
-              - store-artifacts
-        - submit:
-            requires:
-              - wait-for-decision
-```
+## GitHub Action
 
-The CircleCI configuration file is located in `.circleci/config.yml`.
-
+Before explain the pipeline, it is important to explain the GitHub Action which are using the Docker image that you can use in your pipelines. 
+You can find all the explanation in [this repo](https://github.com/xavidop/alexa-ask-aws-cli-docker).
 
 ## Resources
 * [DevOps Wikipedia](https://en.wikipedia.org/wiki/DevOps) - Wikipedia reference
 * [Official Alexa Skills Kit Node.js SDK](https://www.npmjs.com/package/ask-sdk) - The Official Node.js SDK Documentation
 * [Official Alexa Skills Kit Documentation](https://developer.amazon.com/docs/ask-overviews/build-skills-with-the-alexa-skills-kit.html) - Official Alexa Skills Kit Documentation
-* [Official CircleCI Documentation](https://circleci.com/docs/) - Official CircleCI Documentation
+* [Official GitHub Actions Documentation](https://docs.github.com/) - Official GitHub Actions Documentation
 
 ## Conclusion 
 
-This is the first step to know how to DevOps your Alexa Skills using CircleCI.
+This is the first step to know how to DevOps your Alexa Skills using GitHub Actions.
 As you have seen in this example, the Alexa Tools like ASK CLI can help us a lot. We will update this readme while we are updating the pipeline.
 I hope this example project is useful to you.
 
