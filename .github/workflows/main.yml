@@ -221,7 +221,6 @@ jobs:
         sudo npm install -g ask-cli;
         sudo npm install -g bespoken-tools;
         chmod +x -R ./test;
-        
       env: # Or as an environment variable
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
@@ -284,13 +283,13 @@ jobs:
 
   store-artifacts:
     runs-on: ubuntu-latest
-    name: Submit
+    name: Store Artifacts
     needs: submit
     steps:
     # To use this repository's private action,
     # you must check out the repository
     - name: Checkout
-      uses: actions/checkout@v2}
+      uses: actions/checkout@v2
     - name: Upload code
       uses: actions/upload-artifact@v2
       with:
