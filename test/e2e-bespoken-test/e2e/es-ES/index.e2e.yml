@@ -16,10 +16,4 @@ configuration:
 - test : Ayuda test con stop intent
 - abre version dos: "bienvenido puedes decir hola o ayuda"
 - ayuda: "puedes decirme hola * ayudar"
-- para: "hasta *"
-
----
-- test : Ayuda test con cancel intent
-- abre version dos: "bienvenido puedes decir hola o ayuda"
-- ayuda: "puedes decirme hola * ayudar"
-- cancela: "hasta *"
+- para: "hasta*"
