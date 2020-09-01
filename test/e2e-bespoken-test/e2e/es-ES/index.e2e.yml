@@ -12,8 +12,3 @@ configuration:
 - abre version dos: "bienvenido puedes decir hola o ayuda"
 - hola: 
 
----
-- test : Ayuda test con stop intent
-- abre version dos: "bienvenido puedes decir hola o ayuda"
-- ayuda: "puedes decirme hola * ayudar"
-- para: "hasta*"
