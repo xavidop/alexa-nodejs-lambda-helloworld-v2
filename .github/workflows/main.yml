@@ -221,6 +221,7 @@ jobs:
         sudo npm install -g ask-cli;
         sudo npm install -g bespoken-tools;
         chmod +x -R ./test;
+        bst test --config test/e2e-bespoken-test/testing.json
       env: # Or as an environment variable
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         ASK_ACCESS_TOKEN: ${{ secrets.ASK_ACCESS_TOKEN }}
